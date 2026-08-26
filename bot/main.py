@@ -5,6 +5,7 @@ import logging
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.exceptions import TelegramAPIError
 
 from bot import handlers
 from bot.config import get_settings
@@ -21,6 +22,15 @@ def _configure_logging(level: str) -> None:
         level=level,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
+
+
+async def _notify_startup(bot: Bot, admin_chat_id: int, text: str, logger: logging.Logger) -> None:
+    """Стартовое уведомление — best-effort. Ошибка отправки (chat not found,
+    неверный токен и т.п.) не должна ронять процесс (ТЗ §1.7)."""
+    try:
+        await bot.send_message(admin_chat_id, text)
+    except TelegramAPIError:
+        logger.warning("Не удалось отправить стартовое уведомление админу", exc_info=True)
 
 
 def _default_filters_from_settings(settings) -> Filters:
@@ -71,13 +81,16 @@ async def main() -> None:
 
     if was_cold_start:
         total = await worker.cold_start()
-        await bot.send_message(
-            settings.admin_chat_id,
+        await _notify_startup(
+            bot, settings.admin_chat_id,
             f"🚀 Бот запущен, отслеживаю {total} объявлений. Новые уведомления начнутся со следующего цикла.",
+            logger,
         )
         logger.info("Холодный старт: записано %d объявлений", total)
     else:
-        await bot.send_message(settings.admin_chat_id, "🚀 Бот перезапущен, продолжаю отслеживание.")
+        await _notify_startup(
+            bot, settings.admin_chat_id, "🚀 Бот перезапущен, продолжаю отслеживание.", logger
+        )
 
     worker_task = asyncio.create_task(worker.run_forever())
 
