@@ -1,0 +1,16 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY bot/ bot/
+COPY core/ core/
+COPY scraper/ scraper/
+
+RUN mkdir -p data debug
+
+ENV PYTHONUNBUFFERED=1
+
+CMD ["python", "-m", "bot.main"]

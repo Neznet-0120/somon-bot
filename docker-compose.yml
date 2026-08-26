@@ -1,0 +1,10 @@
+services:
+  somon-bot:
+    build: .
+    container_name: somon-rent-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./debug:/app/debug

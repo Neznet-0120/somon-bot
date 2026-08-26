@@ -1,0 +1,17 @@
+[Unit]
+Description=Somon Rent Bot — мониторинг аренды квартир на somon.tj
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Замени на своего пользователя (например, User=ubuntu)
+User=somon
+WorkingDirectory=/opt/somon-rent-bot
+ExecStart=/opt/somon-rent-bot/.venv/bin/python -m bot.main
+Restart=always
+RestartSec=10
+EnvironmentFile=/opt/somon-rent-bot/.env
+
+[Install]
+WantedBy=multi-user.target

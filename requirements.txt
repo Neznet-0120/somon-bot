@@ -1,0 +1,6 @@
+aiogram==3.15.0
+httpx[socks]==0.28.1
+selectolax==0.3.24
+aiosqlite==0.20.0
+pydantic-settings==2.7.0
+structlog==24.4.0
